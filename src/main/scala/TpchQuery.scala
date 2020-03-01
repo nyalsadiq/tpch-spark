@@ -81,10 +81,21 @@ object TpchQuery {
       queryNum = args(0).toInt
 
     val conf = new SparkConf().setAppName("Simple Application")
+
+    val accessKeyId = System.getenv("AWS_ACCESS_KEY_ID")
+    val secretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY")
+
+    System.setProperty("com.amazonaws.services.s3.enableV4", "true");
+
+    conf.set("spark.hadoop.fs.s3a.endpoint", "s3.eu-west-2.amazonaws.com")
+    conf.set("spark.hadoop.fs.s3a.access.key", accessKeyId)
+    conf.set("spark.hadoop.fs.s3a.secret.key", secretAccessKey)
+
     val sc = new SparkContext(conf)
 
+
     // read files from local FS
-    val INPUT_DIR = "file://" + new File(".").getAbsolutePath() + "/dbgen"
+    val INPUT_DIR = "s3a://honours-proj-tpc-h"
 
     // read from hdfs
     // val INPUT_DIR: String = "/dbgen"
