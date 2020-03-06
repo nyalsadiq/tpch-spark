@@ -91,9 +91,16 @@ object TpchQuery {
     conf.set("spark.hadoop.fs.s3a.access.key", accessKeyId)
     conf.set("spark.hadoop.fs.s3a.secret.key", secretAccessKey)
 
+    val cachingScheme = System.getenv("SQL_CACHING_SCHEME")
+    val cacheSize = System.getenv("SQL_CACHE_SIZE")
+    conf.setSQLCachingScheme(cachingScheme)
+    conf.setSQLCacheSize(cacheSize)
+
+    System.out.println("Using: " + System.getenv("SQL_CACHING_SCHEME"))
+    System.out.println("Using CacheManager cache of size: " + System.getenv("SQL_CACHE_SIZE"))
+
     val sc = new SparkContext(conf)
-
-
+  
     // read files from local FS
     val INPUT_DIR = "s3a://honours-proj-tpc-h"
 
@@ -105,7 +112,7 @@ object TpchQuery {
     val output = new ListBuffer[(String, Float)]
     output ++= executeQueries(sc, schemaProvider, queryNum)
 
-    val outFile = new File("TIMES.txt")
+    val outFile = new File("TIMES-" + cachingScheme + "-" + cacheSize + ".txt")
     val bw = new BufferedWriter(new FileWriter(outFile, true))
 
     output.foreach {
